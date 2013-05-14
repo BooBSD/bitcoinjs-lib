@@ -2,15 +2,8 @@ var base58 = require('./base58');
 var Crypto = require('./crypto-js/crypto');
 var conv = require('./convert');
 
-var address_types = {
-    prod: 0,
-    testnet: 111
-};
-
-var p2sh_types = {
-    prod: 5,
-    testnet: 196
-};
+var addressTypes = [0, 111];
+var p2shTypes = [5, 196];
 
 var Address = function (bytes) {
   if (typeof bytes === 'string') {
@@ -45,7 +38,7 @@ Address.prototype.getHashBase64 = function () {
 };
 
 // TODO(shtylman) isValid?
-Address.validate = function(string, type) {
+Address.validate = function(string) {
   try {
     var bytes = base58.decode(string);
   } catch (e) {
@@ -65,7 +58,7 @@ Address.validate = function(string, type) {
 
   var version = hash[0];
 
-  if (type && version !== address_types[type] && version !== p2sh_types[type]) {
+  if (!~addressTypes.indexOf(version) && !~p2shTypes.indexOf(version)) {
     return false;
   }
 
@@ -90,8 +83,7 @@ Address.decodeString = function (string) {
   }
 
   var version = hash.shift();
-  // TODO(shtylman) allow for specific version decoding same as validate above
-  if (version != 0) {
+  if (!~addressTypes.indexOf(version)) {
     throw new Error('Address version not supported: ' + string);
   }
 
